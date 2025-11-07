@@ -64,7 +64,7 @@ def count_flights_and_rain_hours(data_list):
         try:
 
             #Total departure flights in the 12-hour window
-            dep_time= datetime.strptime(row[3],"%H:%M:").time()
+            dep_time= datetime.strptime(row[3],"%H:%M").time()
             if window_start <= dep_time < window_end:
                 total_departure_flights_12hr+=1
                 #Checking for rain hours
@@ -86,9 +86,9 @@ def count_two_terminal_flights(data_list):
     for row in data_list:
         try:
 
-            dep_time= datetime.strptime(row[3],"%H:%M:").time()
+            dep_time= datetime.strptime(row[3],"%H:%M").time()
             if int(row[8])== 2 and window_start <= dep_time < window_end:
-                total_departure_T+=1
+                total_departure_T2+=1
         
         except Exception as e:
             
@@ -102,10 +102,11 @@ def count_Air_France_flights(data_list):
     '''This function counts the toal number of Air France flights'''
  
     total_AF_airline_flights=0
+    delayed_AF_flights=0
     for row in data_list:
         try:
 
-            dep_time= datetime.strptime(row[3],"%H:%M:").time()
+            dep_time= datetime.strptime(row[3],"%H:%M").time()
             airline=row[1][:2]
             if airline=="AF" and window_start <= dep_time < window_end:
                 total_AF_airline_flights+=1
@@ -127,7 +128,7 @@ def count_flights_under_15_degrees(data_list):
     for row in data_list:
         try:
 
-            dep_time= datetime.strptime(row[3],"%H:%M:").time()
+            dep_time= datetime.strptime(row[3],"%H:%M").time()
             temperature=int(row[10][0:2])
             if temperature < 15 and window_start <= dep_time < window_end:
                 total_flights_temp+=1
@@ -140,14 +141,14 @@ def count_flights_under_15_degrees(data_list):
     return total_flights_temp
 
 
-def count_flights_under_600_miles(data_lits):
+def count_flights_under_600_miles(data_list):
     '''This function counts the total number of departures of flights that are under 600 miles'''
     
     total_flights_under_600=0
     for row in data_list:
         try:
 
-            dep_time= datetime.strptime(row[3],"%H:%M:").time()
+            dep_time= datetime.strptime(row[3],"%H:%M").time()
             if int(row[5])< 600 and window_start<= dep_time < window_end:
                 total_flights_under_600+=1
         
@@ -166,38 +167,41 @@ def count_least_common_destinations(data_list,defined_airport_codes):
     for row in data_list:
         try:
 
-            dep_time-=datetime.strptime(row[3],"%H:%M:").time()
+            dep_time=datetime.strptime(row[3],"%H:%M").time()
             #Finding the destinations with the least number of flights
             destination=row[4]
             if window_start <= dep_time < window_end and destination in defined_airport_codes:
-                count_of_destinations[destination]=1
-            
-            else:
-                count_of_destinations[destination]+=1
-                
-            least_common_destination=[]
-            least_common_destinations_full_form=[]
-            least_common_destination_count=min(count_of_destinations.values()) #Finding the minimum value in the dictionary of count of destinations
+                #Add 1 to the destination if it already exists else start at 1
+                count_of_destinations[destination]= count_of_destinations.get(destination,0)+1
 
-            for destination,count in count_of_destinations.items():
-                if count==least_common_destination_count:
-                    least_common_destination.append(destination)
-                
-            for destination in least_common_destination:
-                least_common_destinations_full_form.append("defined_airport_codes[destination]")
-            
+        
         except Exception as e:
-
             print(f"Error processing row: {e}:")
+            continue
+
+    if not count_of_destinations:
+        return [] #Return an empty list if there are no destinations found
+               
+    least_common_destination_count=min(count_of_destinations.values()) #Finding the minimum value in the dictionary of count of destinations
+    least_common_destinations=[] #List to hold the least common destinations
+    for destination,count in count_of_destinations.items():
+        if count==least_common_destination_count:
+            least_common_destinations.append(destination)
+
+    least_common_destinations_full_form=[]#List to hold the full form of least common destinations      
+    for destination in least_common_destinations:
+        least_common_destinations_full_form.append(defined_airport_codes[destination])
+            
         
     return least_common_destinations_full_form
 
 def count_airline_flights(data_list):
     '''This function counts the total number of flights for a given airline code'''
+    total_BA_airline_flights=0
     for row in data_list:
         try:
 
-            dep_time=datetime.strptime.row[3],("%H:%M:").time()
+            dep_time=datetime.strptime(row[3],"%H:%M").time()
     
             airline=row[1][:2]
             if airline=="BA" and window_start <= dep_time < window_end:
@@ -205,6 +209,7 @@ def count_airline_flights(data_list):
         
         except Exception as e:
             print(f"Error processing row: {e}:")
+            continue
 
 
     return total_BA_airline_flights
@@ -271,8 +276,8 @@ def main():
     least_common_destinations_full_form=count_least_common_destinations(data_list,defined_airport_codes)
 
     average_BA_flights=round(total_AF_airline_flights/12,2)
-    percentage_BA_flights=round(total_BA_airline_flights/total_departure_flights*100,2)
-    percentage_delayed_AF_flights=round(delayed_AF_flights/total_AF_airline_flights*100,2)
+    percentage_BA_flights=round((total_BA_airline_flights/total_departure_flights)*100,2)
+    percentage_delayed_AF_flights=round((delayed_AF_flights/total_AF_airline_flights)*100,2)
 
     with open ("results.txt","a") as fo:
         lines=[
@@ -285,10 +290,12 @@ def main():
                 f"There was an average of {average_BA_flights} British Airways flights per hour from this airport\n",
                 f"British Airways planes made up {percentage_BA_flights} of all departures\n",
                 f"{percentage_delayed_AF_flights} of Air France departures were delayed\n",
-                f"They were {rainy_hours} hours in which rain fell\n",
+                f"They were {len(rainy_hours)} hours in which rain fell\n",
                 f"The least common destination(s) are {least_common_destinations_full_form}\n"
             ]
         for line in lines:
             fo.write(line)
             print(line,end="")
 
+if __name__=="__main__":
+    main()
