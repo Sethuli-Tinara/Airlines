@@ -21,8 +21,8 @@ load_csv_(selected_data_file) #calling the function to load the csv file into da
 
 #Creating a dictionary with airport code and it's respective airport name
 defined_airport_codes={
-    "LHR":"Londom Heathrow",
-    "MAD":"Madrid Adolfo Suarez-Bajara",
+    "LHR":"London Heathrow",
+    "MAD":"Madrid Adolfo Suárez-Bajaras",
     "CDG":"Charles De Gaulle International",
     "IST":"Istanbul Airport International",
     "AMS":"Amsterdam Schiphol",
@@ -39,7 +39,7 @@ defined_airlines={
     "AF":"Air France",
     "AY":"Finnair",
     "KL":"KLM",
-    "SK":"Scandavian Airlines",
+    "SK":"Scandinavian Airlines",
     "TP":"TAP Air Portugal",
     "TK":"Turkish Airlines",
     "W6":"Wizz Air",
@@ -76,11 +76,10 @@ def count_flights_and_rain_hours(data_list):
             print(f"Error processing row: {e}")
             continue
     
-    return total_departure_flights_12hr, rainy_hours
-
+    return total_departure_flights_12hr, rainy_hours                                  
 
 def count_two_terminal_flights(data_list):
-    '''This function counts the total number of flights departing from Terminal 2'''
+    '''This function counts the total number of flights departing from Terminal 2 in 12 hour window'''
     
     total_departure_T2=0
     for row in data_list:
@@ -99,7 +98,7 @@ def count_two_terminal_flights(data_list):
 
 
 def count_Air_France_flights(data_list):
-    '''This function counts the toal number of Air France flights'''
+    '''This function counts the toal number of Air France flights in 12 hour window'''
  
     total_AF_airline_flights=0
     delayed_AF_flights=0
@@ -122,14 +121,14 @@ def count_Air_France_flights(data_list):
 
 
 def count_flights_under_15_degrees(data_list):
-    '''This function counts the total number of departures of flights thaat are under 15 Celsius degrees'''
+    '''This function counts the total number of departures of flights thaat are under 15 Celsius degrees in 12 hour window'''
     
     total_flights_temp=0
     for row in data_list:
         try:
 
             dep_time= datetime.strptime(row[3],"%H:%M").time()
-            temperature=int(row[10][0:2])
+            temperature= int(row[10][0:2])
             if temperature < 15 and window_start <= dep_time < window_end:
                 total_flights_temp+=1
         
@@ -142,7 +141,7 @@ def count_flights_under_15_degrees(data_list):
 
 
 def count_flights_under_600_miles(data_list):
-    '''This function counts the total number of departures of flights that are under 600 miles'''
+    '''This function counts the total number of departures of flights that are under 600 miles in 12 hour window'''
     
     total_flights_under_600=0
     for row in data_list:
@@ -161,7 +160,7 @@ def count_flights_under_600_miles(data_list):
 
 
 def count_least_common_destinations(data_list,defined_airport_codes):
-    '''This functions finds the least common destination(s) from the data list'''
+    '''This functions finds the least common destination(s) from the data list in 12 hour window'''
 
     count_of_destinations={} #Creating a dictionary to find the least common destinations
     for row in data_list:
@@ -242,8 +241,8 @@ def main():
         
         try:
 
-            year=int(input("Please enter the year required in the format YYYY: "))
-            if year>=2000 and year<=2025:
+            year= int(input("Please enter the year required in the format YYYY: "))
+            if year >= 2000 and year <= 2025:
                     year=str(year)
 
                     break #Breaks when year is valid
@@ -256,9 +255,10 @@ def main():
     
 
     filename=f"{city_code}{year}.csv"
-    print("*"*100)
+    text=f"File {filename} selected-Planes departing {defined_airport_codes[city_code]} {year}"
+    print("*"*len(text))
     print(f"File {filename} selected-Planes departing {defined_airport_codes[city_code]} {year}")
-    print("*"*100)
+    print("*"*len(text))
 
     #Passing argument(File) and clearing previous data
     data_list.clear()
@@ -267,19 +267,25 @@ def main():
 
 
     #Calling functions and Calculating required values
-    total_departure_flights,rainy_hours=count_flights_and_rain_hours(data_list)
-    total_departure_T2=count_two_terminal_flights(data_list)
-    total_flights_under_600=count_flights_under_600_miles(data_list)
-    total_AF_airline_flights,delayed_AF_flights=count_Air_France_flights(data_list)
-    total_flights_temp=count_flights_under_15_degrees(data_list)
-    total_BA_airline_flights=count_airline_flights(data_list)
-    least_common_destinations_full_form=count_least_common_destinations(data_list,defined_airport_codes)
+    total_departure_flights,rainy_hours= count_flights_and_rain_hours(data_list)
+    total_departure_T2= count_two_terminal_flights(data_list)
+    total_flights_under_600= count_flights_under_600_miles(data_list)
+    total_AF_airline_flights,delayed_AF_flights= count_Air_France_flights(data_list)
+    total_flights_temp= count_flights_under_15_degrees(data_list)
+    total_BA_airline_flights= count_airline_flights(data_list)
+    least_common_destinations_full_form= count_least_common_destinations(data_list,defined_airport_codes)
 
-    average_BA_flights=round(total_AF_airline_flights/12,2)
+    average_BA_flights=round(total_BA_airline_flights/12,2)
     percentage_BA_flights=round((total_BA_airline_flights/total_departure_flights)*100,2)
     percentage_delayed_AF_flights=round((delayed_AF_flights/total_AF_airline_flights)*100,2)
 
     with open ("results.txt","a") as fo:
+
+        #/n used to write in to new lines
+        fo.write("*"*len(text)+ "\n")
+        fo.write(text+ "\n")
+        fo.write("*"*len(text)+ "\n")
+    
         lines=[
             
                 f"The total number of departure flights from this airport was {total_departure_flights}\n",
@@ -288,14 +294,32 @@ def main():
                 f"There were {total_AF_airline_flights} Air France flights from this airport\n",
                 f"There were {total_flights_temp} flights departing in temperatures below 15 degrees\n",
                 f"There was an average of {average_BA_flights} British Airways flights per hour from this airport\n",
-                f"British Airways planes made up {percentage_BA_flights} of all departures\n",
-                f"{percentage_delayed_AF_flights} of Air France departures were delayed\n",
-                f"They were {len(rainy_hours)} hours in which rain fell\n",
+                f"British Airways planes made up {percentage_BA_flights}% of all departures\n",
+                f"{percentage_delayed_AF_flights}% of Air France departures were delayed\n",
+                f"There were {len(rainy_hours)} hours in which rain fell\n",
                 f"The least common destination(s) are {least_common_destinations_full_form}\n"
             ]
         for line in lines:
             fo.write(line)
             print(line,end="")
 
+
 if __name__=="__main__":
     main()
+
+
+while True :
+        try:
+
+            user_choice=input("Do you want to select a new data file? Y/N:").lower()
+            if user_choice== "y":
+                main()
+            elif user_choice== "n":
+                print("Thank you. End of run.")
+                break
+            else:
+                print("Invalid choice.Please enter Y or N only. ")
+
+        except ValueError:
+            
+            print("Invalid choice.Please enter Y or N only.")
