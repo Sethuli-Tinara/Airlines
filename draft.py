@@ -183,7 +183,7 @@ def count_least_common_destinations(data_list,defined_airport_codes):
                
     least_common_destination_count=min(count_of_destinations.values()) #Finding the minimum value in the dictionary of count of destinations
     least_common_destinations=[] #List to hold the least common destinations
-    for destination,count in count_of_destinations.items():
+    for destination,count in count_of_destinations.items():#Appending items to the list after iterating over the dictionary checking if the destination has the least count
         if count==least_common_destination_count:
             least_common_destinations.append(destination)
 
@@ -193,6 +193,7 @@ def count_least_common_destinations(data_list,defined_airport_codes):
             
         
     return least_common_destinations_full_form
+
 
 def count_airline_flights(data_list):
     '''This function counts the total number of flights for a given airline code'''
@@ -212,6 +213,20 @@ def count_airline_flights(data_list):
 
 
     return total_BA_airline_flights
+
+def count_flights_per_airline_by_hour(data_list,airline_code):
+    '''This function counts number of flights from an airport of a selected airline'''
+    
+    while airline_code not in defined_airlines:
+            airline_code= input("Unavailable Airline code please try again: ")
+
+
+
+
+
+
+
+
 
 #Main Program
 def main():
@@ -274,6 +289,7 @@ def main():
     total_flights_temp= count_flights_under_15_degrees(data_list)
     total_BA_airline_flights= count_airline_flights(data_list)
     least_common_destinations_full_form= count_least_common_destinations(data_list,defined_airport_codes)
+    
 
     average_BA_flights=round(total_BA_airline_flights/12,2)
     percentage_BA_flights=round((total_BA_airline_flights/total_departure_flights)*100,2)
@@ -302,10 +318,12 @@ def main():
         for line in lines:
             fo.write(line)
             print(line,end="")
-
-
+    
+    airline_code= input("Enter a two-character Airline code to plot a Histogram: ").upper()
+    count_flights_per_airline_by_hour(data_list,airline_code)
 if __name__=="__main__":
     main()
+
 
 
 while True :
