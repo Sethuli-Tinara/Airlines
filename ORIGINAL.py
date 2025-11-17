@@ -17,8 +17,9 @@ def load_csv_(CSV_chosen):
         header = next(csvreader)
         for row in csvreader:
             data_list.append(row)
-    
             
+selected_data_file = 'CDG2021.csv'  # Example CSV file name
+load_csv_(selected_data_file) #calling the function to load the csv file into data_list
 
 #Creating a dictionary with airport code and it's respective airport name
 defined_airport_codes={
