@@ -331,7 +331,7 @@ def main():
     
     airline_code= input("Enter a two-character Airline code to plot a Histogram: ").upper()
     hour=count_flights_per_airline_by_hour(data_list,airline_code)
-    #draw_histogram(airline_code,city_code,year,hour)
+    
 if __name__=="__main__":
     main()
 
