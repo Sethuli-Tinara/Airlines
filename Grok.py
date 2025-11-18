@@ -198,7 +198,7 @@ def draw_histogram(airline_code, airport_code, year, flights_dict):
         airport_name = defined_airport_codes.get(airport_code, airport_code)
 
         win = GraphWin("Histogram", 1200, 800)
-        win.setCoords(0, 0, 100, 100)
+        win.setCoords(0,0, 100, 100)
         win.setBackground(color_rgb(245, 255, 240))
 
         # Title

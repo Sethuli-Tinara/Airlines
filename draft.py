@@ -1,10 +1,10 @@
 import csv
-from datetime import datetime,time
-import graphics
+from datetime import datetime,time as dtime
+from graphics import *
 
 
-window_start= time(0,0)#Start of 12-hour window(midnight)
-window_end=time(12,0)#End of 12 hour window(noon)
+window_start= dtime(0,0)#Start of 12-hour window(midnight)
+window_end= dtime(12,0)#End of 12 hour window(noon)
 
 data_list = []   # data_list An empty list to load and hold data from csv file
 
@@ -237,7 +237,97 @@ def count_flights_per_airline_by_hour(data_list,airline_code):
 
 
     return flights_per_hour
-                
+
+def create_histogram(airline_code,city_code,year,flights_per_hour):
+    '''Creating histogram based on the user's input of airline code to output flights each hour of the respective airline '''
+
+    try:
+        window= GraphWin("Histogram",1920,1080)
+        window.setCoords(0,0,100,100)
+        window.setBackground("white")
+
+        left_margin=15
+        right_margin=5
+        bottom_margin=10
+        top_margin=10
+
+        available_width= 100 - left_margin - right_margin
+        n_hours= 12
+        bar_gap= 4
+
+        #Title
+        title=f"Departures by hour for {defined_airlines.get(airline_code)} from {defined_airport_codes.get(city_code)} {year}"
+        title_style=Text(Point(50,95),title)
+        title_style.setSize(14)
+        title_style.draw(window)
+        
+
+        #Checking if the dictionary is empty and outputing an error message
+        max_count = max(flight_per_hour.values()) if flights_per_hour else 0
+        if max_count <=0 :
+            message = Text(Point(50,50),"No flights for this airline during this period")
+            message.setSize(12)
+            message.draw(window)
+            window.getMouse()
+            window.close()
+
+            return
+
+        #X axis and Y axis
+        axis_line = Line (Point (left_margin-2, bottom_margin) , Point (left_margin-2, bottom_margin + n_hours *(available_width/n_hours)))
+        axis_line.setWidth(1)
+        axis_line.draw(window)
+
+        #Individually looping 
+        for i in range (n_hours):
+            hour = i
+            count = flights_per_hour.get(hour,0)
+
+            #Y positioning
+            y_bottom = bottom_margin+ i*(available_width/n_hours)+(available_width/n_hours - bar_height)/ 2 #Leaving space from x axis to the y axis
+            y_top = y_botttom+ bar_height
+
+            #Scaling bar width
+            bar_width = (count/max_count) * available_width if max_count > 0 else 0
+            
+            
+            #Hour Label
+            hour_label = Text(Point(left_margin-5,(y_top+y_bottom)/2 ), f"{hour:02d}:00")
+            hour_label.setSize(10)
+            hour_label.draw(window)
+
+            #Drawing Bars
+            p1= Point(left_margin,y_bottom)
+            p2= Point(left_margin+bar_width,y_top)
+            bar=Rectangle(p1,p2)
+            bar.setFill("purple")
+            bar.draw(window)
+
+            #Checking if bar is narrow
+            if bar_width < 10:
+                number_position= Point(left_margin+ bar_width + 2, (y_top + y_bottom)/2 )
+
+            else:
+                number_position= Point(left_margin + bar_width-3, (y_top + y_bottom)/2)
+
+            number_text=Text(number_position,str(count))
+            number_text.setSize(8)
+            number_text.draw(window)
+
+            max_text= Text(Point(left_margin + available_width,95-5), f"Max hour = {max_count}")
+            max_text.setSize(12)
+            max_text.draw(window)
+            window.getMouse()
+            window.close()
+
+    except Exception as e:
+        print("Error creating histogram:",e)
+        
+
+        
+            
+            
+             
 #Main Program
 def main():
 
@@ -331,6 +421,7 @@ def main():
     
     airline_code= input("Enter a two-character Airline code to plot a Histogram: ").upper()
     hour=count_flights_per_airline_by_hour(data_list,airline_code)
+    create_histogram(airline_code,city_code,year,flights_per_hour)
     
 if __name__=="__main__":
     main()
