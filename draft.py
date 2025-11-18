@@ -21,7 +21,7 @@ def load_csv_(CSV_chosen):
             
 
 #Creating a dictionary with airport code and it's respective airport name
-defined_airport_codes={
+defined_airport_codes= {
     "LHR":"London Heathrow",
     "MAD":"Madrid Adolfo Suárez-Bajaras",
     "CDG":"Charles De Gaulle International",
@@ -35,7 +35,7 @@ defined_airport_codes={
     }
 
 #Creating a dictionary for airlines
-defined_airlines={
+defined_airlines= {
     "BA":"British Airways",
     "AF":"Air France",
     "AY":"Finnair",
@@ -56,7 +56,7 @@ defined_airlines={
 
 #Creating a dictionary to count flights for each hour(From 00.00am - 11.00 am)
 
-flights_per_hour={hour: 0 for hour in range(12)}
+flights_per_hour= {hour: 0 for hour in range(12)}
 
 def count_flights_and_rain_hours(data_list):
     '''This function counts the total number of flights departing and the hours in which rain fell in the 12-hour window'''
@@ -104,17 +104,17 @@ def count_two_terminal_flights(data_list):
 def count_Air_France_flights(data_list):
     '''This function counts the total number of Air France flights in 12 hour window'''
  
-    total_AF_airline_flights=0
-    delayed_AF_flights=0
+    total_AF_airline_flights =0
+    delayed_AF_flights = 0
     for row in data_list:
         try:
             #
             dep_time= datetime.strptime(row[3],"%H:%M").time()
             airline=row[1][:2]
-            if airline=="AF" and window_start <= dep_time < window_end:
-                total_AF_airline_flights+=1
-                if row[2]!=row[3]:
-                    delayed_AF_flights+=1
+            if airline == "AF" and window_start <= dep_time < window_end:
+                total_AF_airline_flights += 1
+                if row[2] != row[3]:
+                    delayed_AF_flights += 1
 
         
         except Exception as e:
@@ -134,7 +134,7 @@ def count_flights_under_15_degrees(data_list):
             dep_time= datetime.strptime(row[3],"%H:%M").time()
             temperature= int(row[10][0:2])
             if temperature < 15 and window_start <= dep_time < window_end:
-                total_flights_temp+=1
+                total_flights_temp += 1
         
         except Exception as e:
 
@@ -147,12 +147,12 @@ def count_flights_under_15_degrees(data_list):
 def count_flights_under_600_miles(data_list):
     '''This function counts the total number of departures of flights that are under 600 miles in 12 hour window'''
     
-    total_flights_under_600=0
+    total_flights_under_600 = 0
     for row in data_list:
         try:
             dep_time= datetime.strptime(row[3],"%H:%M").time()
             if int(row[5])< 600 and window_start<= dep_time < window_end:
-                total_flights_under_600+=1
+                total_flights_under_600 += 1
         
         except Exception as e:
             
@@ -165,13 +165,14 @@ def count_flights_under_600_miles(data_list):
 def count_least_common_destinations(data_list,defined_airport_codes):
     '''This functions finds the least common destination(s) from the data list in 12 hour window'''
 
-    count_of_destinations={} #Creating a dictionary to find the least common destinations
+    count_of_destinations= {} #Creating a dictionary to find the least common destinations
     for row in data_list:
         try:
 
             dep_time=datetime.strptime(row[3],"%H:%M").time()
             #Finding the destinations with the least number of flights
             destination=row[4]
+            
             if window_start <= dep_time < window_end and destination in defined_airport_codes:
                 #Add 1 to the destination if it already exists else start at 1
                 count_of_destinations[destination]= count_of_destinations.get(destination,0)+1
@@ -184,13 +185,13 @@ def count_least_common_destinations(data_list,defined_airport_codes):
     if not count_of_destinations:
         return [] #Return an empty list if there are no destinations found
                
-    least_common_destination_count=min(count_of_destinations.values()) #Finding the minimum value in the dictionary of count of destinations
-    least_common_destinations=[] #List to hold the least common destinations
+    least_common_destination_count = min(count_of_destinations.values()) #Finding the minimum value in the dictionary of count of destinations
+    least_common_destinations = [] #List to hold the least common destinations
     for destination,count in count_of_destinations.items():#Appending items to the list after iterating over the dictionary checking if the destination has the least count
-        if count==least_common_destination_count:
+        if count == least_common_destination_count :
             least_common_destinations.append(destination)
 
-    least_common_destinations_full_form=[]#List to hold the full form of least common destinations      
+    least_common_destinations_full_form = []#List to hold the full form of least common destinations      
     for destination in least_common_destinations:
         least_common_destinations_full_form.append(defined_airport_codes[destination])
             
@@ -200,16 +201,16 @@ def count_least_common_destinations(data_list,defined_airport_codes):
 
 def count_airline_flights(data_list):
     '''This function counts the total number of flights for a given airline code'''
-    total_BA_airline_flights=0
+    total_BA_airline_flights = 0
     for row in data_list:
         try:
 
             dep_time=datetime.strptime(row[3],"%H:%M").time()
     
-            airline=row[1][:2]
+            airline = row[1][:2]
             #Checking time window and airline 
-            if airline=="BA" and window_start <= dep_time < window_end:
-                total_BA_airline_flights+=1
+            if airline =="BA" and window_start <= dep_time < window_end:
+                total_BA_airline_flights += 1
         
         except Exception as e:
             print(f"Error processing row: {e}:")
@@ -242,19 +243,19 @@ def create_histogram(airline_code,city_code,year,flights_per_hour):
     '''Creating histogram based on the user's input of airline code to output flights each hour of the respective airline '''
 
     try:
-        window= GraphWin("Histogram",1920,1080)
+        #Create window
+        window= GraphWin("Histogram",1200,700)
         window.setCoords(0,0,100,100)
         window.setBackground("white")
 
-        left_margin=15
-        right_margin=5
-        bottom_margin=10
-        top_margin=10
-
-        available_width= 100 - left_margin - right_margin
+        left_margin= 25
+        bottom_margin= 10
+        bar_height= 5
+        spacing = 2
+        total_height = (bar_height + spacing) * 12
         n_hours= 12
-        bar_gap= 4
 
+        
         #Title
         title=f"Departures by hour for {defined_airlines.get(airline_code)} from {defined_airport_codes.get(city_code)} {year}"
         title_style=Text(Point(50,95),title)
@@ -263,8 +264,8 @@ def create_histogram(airline_code,city_code,year,flights_per_hour):
         
 
         #Checking if the dictionary is empty and outputing an error message
-        max_count = max(flight_per_hour.values()) if flights_per_hour else 0
-        if max_count <=0 :
+        max_count = max(flights_per_hour.values()) if flights_per_hour else 0
+        if max_count == 0 :
             message = Text(Point(50,50),"No flights for this airline during this period")
             message.setSize(12)
             message.draw(window)
@@ -273,22 +274,23 @@ def create_histogram(airline_code,city_code,year,flights_per_hour):
 
             return
 
-        #X axis and Y axis
-        axis_line = Line (Point (left_margin-2, bottom_margin) , Point (left_margin-2, bottom_margin + n_hours *(available_width/n_hours)))
-        axis_line.setWidth(1)
-        axis_line.draw(window)
+        #Y axis label
+        y_axis_line = Text(Point(left_margin - 10, bottom_margin + 40), "Hours\n00:00\nto\n12:00")
+        y_axis_line.setSize(12)
+        y_axis_line.draw(window)
 
-        #Individually looping 
+
+        #Individually looping to draw each bar
         for i in range (n_hours):
-            hour = i
+            hour= i
             count = flights_per_hour.get(hour,0)
 
-            #Y positioning
-            y_bottom = bottom_margin+ i*(available_width/n_hours)+(available_width/n_hours - bar_height)/ 2 #Leaving space from x axis to the y axis
-            y_top = y_botttom+ bar_height
+            #Vertical stacking
+            y_bottom = bottom_margin + hour * (bar_height + spacing)
+            y_top = y_bottom+ bar_height
 
             #Scaling bar width
-            bar_width = (count/max_count) * available_width if max_count > 0 else 0
+            bar_width = (count/max_count) * 60 if max_count > 0 else 0
             
             
             #Hour Label
@@ -303,21 +305,21 @@ def create_histogram(airline_code,city_code,year,flights_per_hour):
             bar.setFill("purple")
             bar.draw(window)
 
-            #Checking if bar is narrow
-            if bar_width < 10:
-                number_position= Point(left_margin+ bar_width + 2, (y_top + y_bottom)/2 )
+            #Count label (infront of bar)
+            text_x = left_margin + bar_width + 3
+            text_y = (y_bottom + y_top) / 2
+            text = Text(Point(text_x, text_y), str(count))
+            text.setSize(9)
+            text.draw(window)
 
-            else:
-                number_position= Point(left_margin + bar_width-3, (y_top + y_bottom)/2)
-
-            number_text=Text(number_position,str(count))
-            number_text.setSize(8)
-            number_text.draw(window)
-
-            max_text= Text(Point(left_margin + available_width,95-5), f"Max hour = {max_count}")
-            max_text.setSize(12)
-            max_text.draw(window)
+            
+        try:
             window.getMouse()
+
+        except GraphicsError:
+            pass
+
+        finally:
             window.close()
 
     except Exception as e:
@@ -370,16 +372,22 @@ def main():
     
 
     filename=f"{city_code}{year}.csv"
+    #Passing argument(File) and clearing previous data
+    data_list.clear() 
+
+    
+    try:
+        #Loading selected data file
+        load_csv_(filename)
+
+    except FileNotFoundError:
+        print(f"Error: File {filename} not found.")
+        return
+    
     text=f"File {filename} selected-Planes departing {defined_airport_codes[city_code]} {year}"
     print("*"*len(text))
     print(f"File {filename} selected-Planes departing {defined_airport_codes[city_code]} {year}")
     print("*"*len(text))
-
-    #Passing argument(File) and clearing previous data
-    data_list.clear()
-    load_csv_(filename)
-
-
 
     #Calling functions and Calculating required values
     total_departure_flights,rainy_hours= count_flights_and_rain_hours(data_list)
