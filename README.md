@@ -92,7 +92,7 @@ This project demonstrates:
 * Structured program design
 
 
-Sethuli Tinara Harischandra
-Software Development I Coursework
+Sethuli Tinara Harischandra |
+Software Development I Coursework |
 University of Westminster
 
